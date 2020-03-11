@@ -1,0 +1,12 @@
+[package]
+name = "learning"
+version = "0.1.0"
+authors = ["sun"]
+edition = "2018"
+
+[dependencies]
+rand = "0.7"
+sha2 = "0.8"
+bellman = { path = "../bellman" } # my fork from bellman
+pairing = { path = "../pairing" }
+
