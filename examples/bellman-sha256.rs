@@ -6,10 +6,10 @@ use bellman::{
     },
     groth16, Circuit, ConstraintSystem, SynthesisError,
 };
-
 use pairing::{bls12_381::Bls12, Engine};
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
+use std::time::Instant;
 
 /// Our own SHA-256d gadget. Input and output are in little-endian bit order.
 fn sha256d<E: Engine, CS: ConstraintSystem<E>>(
@@ -68,6 +68,8 @@ impl<E: Engine> Circuit<E> for MyCircuit {
 }
 
 fn main() {
+    let prove_start = Instant::now();
+
     let params = {
         let c = MyCircuit { preimage: None };
         groth16::generate_random_parameters::<Bls12, _, _>(c, &mut OsRng).unwrap()
@@ -84,7 +86,11 @@ fn main() {
     let hash_bits = multipack::bytes_to_bits_le(&hash);
     let inputs = multipack::compute_multipacking::<Bls12>(&hash_bits);
 
+    let prove_time = prove_start.elapsed();
+    let verify_start = Instant::now();
     assert!(groth16::verify_proof(&pvk, &proof, &inputs).unwrap());
+    let verify_time = verify_start.elapsed();
 
-    println!("Hello, world!");
+    println!("proving time: {:?} seconds", prove_time);
+    println!("verifying time: {:?} seconds", verify_time);
 }
